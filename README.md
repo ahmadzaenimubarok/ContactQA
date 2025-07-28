@@ -34,6 +34,8 @@ Setelah Cypress diinstal, struktur direktori akan seperti ini:
 ```
 cypress/
 ├── e2e/
+│   ├── api
+│   │    └── contact_form_api.cy.js
 │   └── contact_form.cy.js  ← Tempat menulis skenario test
 ├── support/
 │   └── e2e.js
@@ -66,6 +68,67 @@ describe('Contact Form', () => {
     cy.get('form').submit()
 
     cy.contains('Your message has been sent successfully.').should('exist')
+  })
+})
+```
+
+---
+
+## 🔧 API Endpoint for Testing
+
+The API under test:
+
+```
+POST /api/contact
+```
+
+**Payload:**
+```json
+{
+  "name": "Ahmad",
+  "email": "ahmad@example.com",
+  "message": "This is a test message."
+}
+```
+
+---
+
+## ✍️ Example API Test: `contact_api.cy.js`
+
+```js
+describe('Contact API', () => {
+  const endpoint = '/api/contact'
+
+  it('should submit valid contact data', () => {
+    cy.request({
+      method: 'POST',
+      url: endpoint,
+      body: {
+        name: 'Ahmad',
+        email: 'ahmad@example.com',
+        message: 'This is a test message.'
+      },
+      failOnStatusCode: false
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+      expect(response.body).to.have.property('success', true)
+    })
+  })
+
+  it('should fail with invalid email', () => {
+    cy.request({
+      method: 'POST',
+      url: endpoint,
+      body: {
+        name: 'Ahmad',
+        email: 'invalid-email',
+        message: 'Test'
+      },
+      failOnStatusCode: false
+    }).then((response) => {
+      expect(response.status).to.eq(422)
+      expect(response.body).to.have.property('errors')
+    })
   })
 })
 ```
